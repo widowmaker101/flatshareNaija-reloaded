@@ -1,0 +1,13 @@
+#!/usr/bin/env zsh
+set -euo pipefail
+APP_ROOT="${0:a:h:h}"
+cmd="${1:-help}"; shift || true
+
+case "$cmd" in
+  init)  mkdir -p "$APP_ROOT/db"; sqlite3 "$APP_ROOT/db/flatshare.db" < "$APP_ROOT/db/migrations/001_init.sql" ;;
+  user)  exec "$APP_ROOT/bin/fsn-user" "$@" ;;
+  pref)  exec "$APP_ROOT/bin/fsn-pref" "$@" ;;
+  listing) exec "$APP_ROOT/bin/fsn-listing" "$@" ;;
+  match) exec "$APP_ROOT/bin/fsn-match" "$@" ;;
+  help|*) echo "Usage: flatshareNaija [init|user|pref|listing|match]" ;;
+esac

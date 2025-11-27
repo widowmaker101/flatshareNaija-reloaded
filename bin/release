@@ -1,0 +1,22 @@
+#!/usr/bin/env zsh
+set -euo pipefail
+
+version="${1:-}"
+if [[ -z "$version" ]]; then
+  echo "❌ Usage: release <version>"
+  exit 1
+fi
+
+echo "🚀 Preparing release $version..."
+
+# Generate changelog
+git log --pretty=format:"- %s" $(git describe --tags --abbrev=0)..HEAD > CHANGELOG.md
+git add CHANGELOG.md
+git commit -m "Update CHANGELOG for $version"
+
+# Tag and push
+git tag "$version"
+git push origin main
+git push origin "$version"
+
+echo "✅ Release $version pushed to GitHub"
