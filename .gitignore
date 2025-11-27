@@ -1,3 +1,3 @@
 db/flatshare.db
-logs/*.log
-.DS_Store
+*.log
+*.swp
