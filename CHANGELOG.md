@@ -1,1 +1,1 @@
-- Add dispatcher and scoring library
+- Add user, pref, listing, and match subcommands
