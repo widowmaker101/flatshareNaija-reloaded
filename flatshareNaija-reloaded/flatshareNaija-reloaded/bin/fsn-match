@@ -1,0 +1,17 @@
+#!/usr/bin/env zsh
+set -euo pipefail
+APP_ROOT="${0:a:h:h}"
+source "$APP_ROOT/lib/scoring.zsh"
+
+user="$1"
+pref=$(sqlite3 "$APP_ROOT/db/flatshare.db" \
+  "SELECT budget,city,area,lifestyle FROM preferences WHERE user='$user' LIMIT 1;")
+IFS='|' read -r budget city area lifestyle <<< "$pref"
+
+echo "🔎 Matching listings for $user ($city, $area, budget $budget)..."
+sqlite3 "$APP_ROOT/db/flatshare.db" \
+  "SELECT id,title,rent,generator,inverter FROM listings WHERE city='$city' AND area='$area';" |
+while IFS='|' read -r id title rent generator inverter; do
+  score=$(score_listing "$rent" "${budget%-*}" "$lifestyle" "$generator" "$inverter")
+  echo "Listing #$id: $title — Rent ₦$rent — Score $score"
+done

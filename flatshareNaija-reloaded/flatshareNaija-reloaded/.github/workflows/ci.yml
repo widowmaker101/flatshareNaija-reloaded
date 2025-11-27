@@ -1,0 +1,34 @@
+name: FlatshareNaija CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y sqlite3 shellcheck
+
+    - name: Lint zsh scripts
+      run: |
+        shellcheck bin/* lib/*.zsh
+
+    - name: Validate SQLite schema
+      run: |
+        sqlite3 :memory: < db/migrations/001_init.sql
+        echo "✅ Schema applied successfully"
+
+    - name: Smoke test CLI
+      run: |
+        chmod +x bin/flatshareNaija
+        ./bin/flatshareNaija help

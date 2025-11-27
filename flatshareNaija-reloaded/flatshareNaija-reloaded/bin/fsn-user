@@ -1,0 +1,12 @@
+#!/usr/bin/env zsh
+set -euo pipefail
+APP_ROOT="${0:a:h:h}"
+cmd="${1:-help}"; shift || true
+case "$cmd" in
+  add) name="$1"; email="$2"; phone="$3"; city="$4"
+       sqlite3 "$APP_ROOT/db/flatshare.db" \
+         "INSERT INTO users(name,email,phone,city) VALUES('$name','$email','$phone','$city');"
+       echo "✅ User $name added." ;;
+  list) sqlite3 -header -column "$APP_ROOT/db/flatshare.db" "SELECT * FROM users;" ;;
+  *) echo "Usage: fsn-user add <name> <email> <phone> <city> | list" ;;
+esac

@@ -1,0 +1,14 @@
+#!/usr/bin/env zsh
+set -euo pipefail
+APP_ROOT="${0:a:h:h}"
+cmd="${1:-help}"; shift || true
+case "$cmd" in
+  add) title="$1"; desc="$2"; city="$3"; area="$4"; rent="$5"
+       sqlite3 "$APP_ROOT/db/flatshare.db" \
+         "INSERT INTO listings(title,description,city,area,rent) VALUES('$title','$desc','$city','$area','$rent');"
+       echo "✅ Listing added: $title" ;;
+  search) city="$1"; area="$2"; max="$3"
+       sqlite3 -header -column "$APP_ROOT/db/flatshare.db" \
+         "SELECT * FROM listings WHERE city='$city' AND area='$area' AND rent <= $max;" ;;
+  *) echo "Usage: fsn-listing add <title> <desc> <city> <area> <rent> | search <city> <area> <max>" ;;
+esac
