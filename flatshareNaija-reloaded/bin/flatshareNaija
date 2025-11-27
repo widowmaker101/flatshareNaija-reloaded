@@ -1,0 +1,25 @@
+set -euo pipefail
+
+APP_ROOT="${0:a:h:h}"
+cmd="${1:-help}"; shift || true
+
+case "$cmd" in
+  init)
+    echo "Initializing FlatshareNaija database..."
+    mkdir -p "$APP_ROOT/db"
+    sqlite3 "$APP_ROOT/db/flatshare.db" < "$APP_ROOT/db/migrations/001_init.sql"
+    ;;
+  help|*)
+    cat <<'USAGE'
+FlatshareNaija-reloaded CLI
+
+Usage:
+  flatshareNaija init
+  flatshareNaija user add ...
+  flatshareNaija pref set ...
+  flatshareNaija listing add ...
+  flatshareNaija listing search ...
+  flatshareNaija match ...
+USAGE
+    ;;
+esac

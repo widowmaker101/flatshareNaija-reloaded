@@ -1,0 +1,12 @@
+#!/usr/bin/env zsh
+set -euo pipefail
+APP_ROOT="${0:a:h:h}"
+cmd="${1:-help}"; shift || true
+case "$cmd" in
+  set) user="$1"; budget="$2"; city="$3"; area="$4"; lifestyle="$5"
+       sqlite3 "$APP_ROOT/db/flatshare.db" \
+         "INSERT INTO preferences(user,budget,city,area,lifestyle) VALUES('$user','$budget','$city','$area','$lifestyle');"
+       echo "✅ Preferences saved for $user." ;;
+  list) sqlite3 -header -column "$APP_ROOT/db/flatshare.db" "SELECT * FROM preferences;" ;;
+  *) echo "Usage: fsn-pref set <user> <budget> <city> <area> <lifestyle> | list" ;;
+esac
