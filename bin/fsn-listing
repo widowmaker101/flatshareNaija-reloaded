@@ -2,11 +2,17 @@
 set -euo pipefail
 APP_ROOT="${0:a:h:h}"
 db="$APP_ROOT/db/flatshare.db"
+source "$APP_ROOT/lib/moderation.zsh"
+
 cmd="${1:-help}"; shift || true
 
 case "$cmd" in
   add)
     title="$1"; desc="$2"; city="$3"; area="$4"; rent="$5"
+    if ! moderate_listing "$desc"; then
+      echo "❌ Listing rejected: $title"
+      exit 1
+    fi
     sqlite3 "$db" "INSERT INTO listings (title,description,city,area,rent) VALUES ('$title','$desc','$city','$area',$rent);"
     echo "✅ Listing added: $title"
     ;;

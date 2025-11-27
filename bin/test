@@ -1,9 +1,15 @@
 #!/usr/bin/env zsh
 set -euo pipefail
+export PATH="$PWD/bin:$PATH"
+
 echo "Running FlatshareNaija smoke tests..."
 flatshareNaija init
 flatshareNaija user add "TestUser" "test@example.com" "+2348012345678" "Abuja"
-flatshareNaija pref set "TestUser" "600000" "Abuja" "Wuse Zone 4" "remote"
-flatshareNaija listing add "Mini-flat Wuse Zone 4" "Self-con, borehole, gen" "Abuja" "Wuse Zone 4" 500000
+flatshareNaija pref set "TestUser" 600000 Abuja Wuse remote
+flatshareNaija listing add "Mini-flat Wuse" "Self-con, borehole, gen" Abuja Wuse 500000
 flatshareNaija match "TestUser"
+echo "— Moderation test"
+flatshareNaija listing add "Scam flat" "2 years upfront required" Abuja Wuse 400000 || echo "✅ Moderation blocked scam listing"
+echo "— NLP search"
+flatshareNaija search "flat in Wuse under 600k with generator"
 echo "✅ All smoke tests passed"

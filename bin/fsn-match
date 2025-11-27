@@ -2,6 +2,7 @@
 set -euo pipefail
 APP_ROOT="${0:a:h:h}"
 db="$APP_ROOT/db/flatshare.db"
+source "$APP_ROOT/lib/scoring.zsh"
 
 user="${1:-}"
 [[ -z "$user" ]] && { echo "Usage: flatshareNaija match <user>"; exit 1; }
@@ -12,6 +13,10 @@ pref=$(sqlite3 "$db" "SELECT budget,city,area,lifestyle FROM preferences WHERE u
 budget=$(echo "$pref" | cut -d'|' -f1)
 city=$(echo "$pref" | cut -d'|' -f2)
 area=$(echo "$pref" | cut -d'|' -f3)
+lifestyle=$(echo "$pref" | cut -d'|' -f4)
 
 echo "🔍 Matching listings for $user..."
-sqlite3 "$db" "SELECT id,title,city,area,rent FROM listings WHERE city='$city' AND area='$area' AND rent <= $budget;"
+sqlite3 "$db" "SELECT id,title,city,area,rent FROM listings WHERE city='$city' AND area='$area' AND rent <= $budget;" | while IFS='|' read -r id title city area rent; do
+  score=$(score_listing "$rent" "$budget" "$lifestyle" 1 1)
+  echo "$id | $title | ₦$rent | Score: $score"
+done | sort -t'|' -k4 -nr
