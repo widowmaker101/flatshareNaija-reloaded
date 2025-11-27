@@ -1,0 +1,21 @@
+#!/usr/bin/env zsh
+set -euo pipefail
+APP_ROOT="${0:a:h:h}"
+db="$APP_ROOT/db/flatshare.db"
+
+cmd="${1:-help}"; shift || true
+
+case "$cmd" in
+  add)
+    name="$1"; email="$2"; phone="$3"; city="$4"
+    sqlite3 "$db" "INSERT INTO users (name,email,phone,city) VALUES ('$name','$email','$phone','$city');"
+    echo "✅ User $name added"
+    ;;
+  list)
+    sqlite3 "$db" "SELECT id,name,email,phone,city FROM users;"
+    ;;
+  *)
+    echo "Usage: flatshareNaija user add <name> <email> <phone> <city>"
+    echo "       flatshareNaija user list"
+    ;;
+esac

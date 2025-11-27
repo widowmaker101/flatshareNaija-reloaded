@@ -1,0 +1,16 @@
+#!/usr/bin/env zsh
+set -euo pipefail
+APP_ROOT="${0:a:h:h}"
+db="$APP_ROOT/db/flatshare.db"
+
+user="$1"
+uid=$(sqlite3 "$db" "SELECT id FROM users WHERE name='$user';")
+pref=$(sqlite3 "$db" "SELECT budget,city,area,lifestyle FROM preferences WHERE user_id=$uid;")
+
+budget=$(echo "$pref" | cut -d'|' -f1)
+city=$(echo "$pref" | cut -d'|' -f2)
+area=$(echo "$pref" | cut -d'|' -f3)
+lifestyle=$(echo "$pref" | cut -d'|' -f4)
+
+echo "🔍 Matching listings for $user..."
+sqlite3 "$db" "SELECT id,title,city,area,rent FROM listings WHERE city='$city' AND area='$area' AND rent <= $budget;"
