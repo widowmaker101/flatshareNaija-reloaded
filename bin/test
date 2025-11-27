@@ -2,14 +2,25 @@
 set -euo pipefail
 export PATH="$PWD/bin:$PATH"
 
-echo "Running FlatshareNaija smoke tests..."
 flatshareNaija init
 flatshareNaija user add "TestUser" "test@example.com" "+2348012345678" "Abuja"
 flatshareNaija pref set "TestUser" 600000 Abuja Wuse remote
-flatshareNaija listing add "Mini-flat Wuse" "Self-con, borehole, gen" Abuja Wuse 500000
-flatshareNaija match "TestUser"
-echo "— Moderation test"
-flatshareNaija listing add "Scam flat" "2 years upfront required" Abuja Wuse 400000 || echo "✅ Moderation blocked scam listing"
-echo "— NLP search"
-flatshareNaija search "flat in Wuse under 600k with generator"
-echo "✅ All smoke tests passed"
+
+# Clean slate and seed
+sqlite3 db/flatshare.db "DELETE FROM listings;"
+flatshareNaija seed
+
+echo "-- Moderation rejection expected:"
+if flatshareNaija listing add "Scam flat" "2 years upfront required" Abuja Wuse 400000; then
+  echo "Moderation failed (should reject)"; exit 1
+else
+  echo "Moderation passed (rejected scam)"
+fi
+
+echo "-- Matching:"
+flatshareNaija match "TestUser" | grep -q "Score:" || { echo "No scored matches"; exit 1; }
+
+echo "-- NLP search:"
+flatshareNaija search "flat in Wuse under 600k with generator" >/dev/null || { echo "NLP search failed"; exit 1; }
+
+echo "✅ Smoke tests passed"

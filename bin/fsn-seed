@@ -1,0 +1,13 @@
+#!/usr/bin/env zsh
+set -euo pipefail
+APP_ROOT="${0:a:h:h}"
+source "$APP_ROOT/lib/common.zsh"
+db="$APP_ROOT/db/flatshare.db"
+
+log_info "Seeding demo data..."
+sqlite3 "$db" "INSERT INTO listings (title,description,city,area,rent,has_generator,has_inverter) VALUES
+('Mini-flat Wuse','Self-con, borehole, gen','Abuja','Wuse',500000,1,0),
+('Studio Lekki','Close to bus stop, inverter','Lagos','Lekki',700000,0,1),
+('Shared Yaba','2 years upfront required','Lagos','Yaba',350000,0,0)
+;"
+log_ok "Seed complete"

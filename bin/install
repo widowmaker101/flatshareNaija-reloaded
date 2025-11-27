@@ -1,0 +1,10 @@
+#!/usr/bin/env zsh
+set -euo pipefail
+root="$PWD"
+mkdir -p "$HOME/.local/bin"
+ln -sf "$root/bin/flatshareNaija" "$HOME/.local/bin/flatshareNaija"
+if ! print -r -- "$PATH" | grep -q "$HOME/.local/bin"; then
+  echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.zshrc"
+  echo "Added \$HOME/.local/bin to PATH. Restart your shell."
+fi
+echo "Installed: flatshareNaija"

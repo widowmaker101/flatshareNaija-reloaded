@@ -1,13 +1,18 @@
 #!/usr/bin/env zsh
 set -euo pipefail
-
 version="${1:-}"
-[[ -z "$version" ]] && { echo "❌ Usage: release <version>"; exit 1; }
+[[ -z "$version" ]] && { echo "Usage: release <version>"; exit 1; }
 
 echo "🚀 Preparing release $version..."
-git add bin lib db README.md LICENSE .gitignore
-git commit -m "Release $version"
-git tag "$version"
+# Stage only existing files to avoid pathspec errors
+to_stage=()
+for p in bin lib db README.md LICENSE .gitignore .github/workflows/ci.yml; do
+  [[ -e "$p" ]] && to_stage+=("$p")
+done
+
+git add "${to_stage[@]}"
+git commit -m "Release $version" || echo "No changes to commit"
+git tag -f "$version"
 git push origin main
-git push origin "$version"
+git push -f origin "$version"
 echo "✅ Release $version pushed"

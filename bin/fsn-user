@@ -1,17 +1,22 @@
 #!/usr/bin/env zsh
 set -euo pipefail
 APP_ROOT="${0:a:h:h}"
+source "$APP_ROOT/lib/common.zsh"
 db="$APP_ROOT/db/flatshare.db"
 cmd="${1:-help}"; shift || true
 
 case "$cmd" in
   add)
-    name="$1"; email="$2"; phone="$3"; city="$4"
+    local name="$1" email="$2" phone="$3" city="$4"
+    require_arg "$name" "name"; require_arg "$email" "email"
+    require_arg "$phone" "phone"; require_arg "$city" "city"
+    valid_phone "$phone" || { log_err "Invalid phone (expected +234XXXXXXXXXX)"; exit 1; }
+    name=$(sql_escape "$name"); email=$(sql_escape "$email"); phone=$(sql_escape "$phone"); city=$(sql_escape "$city")
     sqlite3 "$db" "INSERT INTO users (name,email,phone,city) VALUES ('$name','$email','$phone','$city');"
-    echo "✅ User $name added"
+    log_ok "User $name added"
     ;;
   list)
-    sqlite3 "$db" "SELECT id,name,email,phone,city FROM users;"
+    sqlite3 "$db" -header -column "SELECT id,name,email,phone,city FROM users;"
     ;;
   *)
     echo "Usage: flatshareNaija user add <name> <email> <phone> <city>"

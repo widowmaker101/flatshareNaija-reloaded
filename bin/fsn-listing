@@ -1,24 +1,32 @@
 #!/usr/bin/env zsh
 set -euo pipefail
 APP_ROOT="${0:a:h:h}"
-db="$APP_ROOT/db/flatshare.db"
+source "$APP_ROOT/lib/common.zsh"
 source "$APP_ROOT/lib/moderation.zsh"
-
+db="$APP_ROOT/db/flatshare.db"
 cmd="${1:-help}"; shift || true
 
 case "$cmd" in
   add)
-    title="$1"; desc="$2"; city="$3"; area="$4"; rent="$5"
+    local title="$1" desc="$2" city="$3" area="$4" rent="$5"
+    require_arg "$title" title; require_arg "$desc" desc
+    require_arg "$city" city; require_arg "$area" area
+    valid_money "$rent" || { log_err "Rent must be a positive integer"; exit 1; }
+
     if ! moderate_listing "$desc"; then
-      echo "❌ Listing rejected: $title"
+      log_err "Listing rejected: $title"
       exit 1
     fi
+
+    title=$(sql_escape "$title"); desc=$(sql_escape "$desc"); city=$(sql_escape "$city"); area=$(sql_escape "$area")
     sqlite3 "$db" "INSERT INTO listings (title,description,city,area,rent) VALUES ('$title','$desc','$city','$area',$rent);"
-    echo "✅ Listing added: $title"
+    log_ok "Listing added: $title"
     ;;
   search)
-    city="$1"; area="$2"; max="$3"
-    sqlite3 "$db" "SELECT id,title,city,area,rent FROM listings WHERE city='$city' AND area='$area' AND rent <= $max;"
+    local city="$1" area="$2" max="$3"
+    valid_money "$max" || { log_err "Max must be a positive integer"; exit 1; }
+    city=$(sql_escape "$city"); area=$(sql_escape "$area")
+    sqlite3 "$db" -header -column "SELECT id,title,city,area,rent FROM listings WHERE city='$city' AND area='$area' AND rent <= $max;"
     ;;
   *)
     echo "Usage: flatshareNaija listing add <title> <desc> <city> <area> <rent>"

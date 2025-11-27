@@ -7,17 +7,22 @@ on:
     branches: [ main ]
 
 jobs:
-  test:
+  lint-and-test:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Install SQLite
-        run: sudo apt-get update && sudo apt-get install -y sqlite3
+      - name: Install deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y sqlite3 shellcheck
 
       - name: Make scripts executable
-        run: chmod +x bin/* lib/*
+        run: chmod +x bin/* lib/* || true
+
+      - name: Shellcheck
+        run: shellcheck -x bin/* lib/* || true
 
       - name: Run smoke tests
         run: bin/test

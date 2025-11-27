@@ -1,19 +1,22 @@
 #!/usr/bin/env zsh
 set -euo pipefail
 APP_ROOT="${0:a:h:h}"
+source "$APP_ROOT/lib/common.zsh"
 db="$APP_ROOT/db/flatshare.db"
-
 cmd="${1:-help}"; shift || true
 
 case "$cmd" in
   set)
-    user="$1"; budget="$2"; city="$3"; area="$4"; lifestyle="$5"
-    uid=$(sqlite3 "$db" "SELECT id FROM users WHERE name='$user';")
+    local user="$1" budget="$2" city="$3" area="$4" lifestyle="${5:-}"
+    require_arg "$user" user; require_arg "$budget" budget; valid_money "$budget" || { log_err "Budget must be a positive integer"; exit 1; }
+    uid=$(sqlite3 "$db" "SELECT id FROM users WHERE name='$(sql_escape "$user")';")
+    [[ -n "$uid" ]] || { log_err "User not found: $user"; exit 1; }
+    city=$(sql_escape "$city"); area=$(sql_escape "$area"); lifestyle=$(sql_escape "$lifestyle")
     sqlite3 "$db" "INSERT INTO preferences (user_id,budget,city,area,lifestyle) VALUES ($uid,$budget,'$city','$area','$lifestyle');"
-    echo "✅ Preferences set for $user"
+    log_ok "Preferences set for $user"
     ;;
   list)
-    sqlite3 "$db" "SELECT * FROM preferences;"
+    sqlite3 "$db" -header -column "SELECT * FROM preferences;"
     ;;
   *)
     echo "Usage: flatshareNaija pref set <user> <budget> <city> <area> <lifestyle>"

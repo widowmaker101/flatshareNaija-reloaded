@@ -1,0 +1,19 @@
+#!/usr/bin/env zsh
+set -euo pipefail
+APP_ROOT="${0:a:h:h}"
+source "$APP_ROOT/lib/common.zsh"
+db="$APP_ROOT/db/flatshare.db"
+
+fmt="${1:-csv}"
+case "$fmt" in
+  csv)
+    sqlite3 "$db" -header -csv "SELECT id,title,city,area,rent,has_generator,has_inverter FROM listings;"
+    ;;
+  json)
+    sqlite3 "$db" -json "SELECT id,title,city,area,rent,has_generator,has_inverter FROM listings;"
+    ;;
+  *)
+    log_err "Unknown format: $fmt (use csv|json)"
+    exit 1
+    ;;
+esac

@@ -1,8 +1,9 @@
 #!/usr/bin/env zsh
 moderate_listing() {
   local desc="$1"
-  if [[ "$desc" == *"2 years upfront"* || "$desc" == *"advance fee"* || "$desc" == *"pay before viewing"* ]]; then
-    echo "⚠️ Suspicious terms detected"
+  local d="${desc:l}"
+  if [[ "$d" == *"2 years upfront"* || "$d" == *"advance fee"* || "$d" == *"pay before viewing"* ]]; then
+    print -r -- "Suspicious terms detected"
     return 1
   fi
   return 0
