@@ -1,0 +1,8 @@
+#!/usr/bin/env zsh
+set -euo pipefail
+APP_ROOT="${0:a:h:h}"
+source "$APP_ROOT/lib/common.zsh"
+require_sqlite
+
+sqlite3 "$FSN_DB" < "$APP_ROOT/db/migrations/001_init.sql"
+log_ok "Database initialized at $FSN_DB"

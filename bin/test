@@ -6,21 +6,29 @@ flatshareNaija init
 flatshareNaija user add "TestUser" "test@example.com" "+2348012345678" "Abuja"
 flatshareNaija pref set "TestUser" 600000 Abuja Wuse remote
 
-# Clean slate and seed
+# Reset listings
 sqlite3 db/flatshare.db "DELETE FROM listings;"
-flatshareNaija seed
 
-echo "-- Moderation rejection expected:"
+# Good listing
+flatshareNaija listing add "Mini-flat Wuse" "Self-con, borehole, gen" Abuja Wuse 500000 1 0
+
+# Bad listing rejected
 if flatshareNaija listing add "Scam flat" "2 years upfront required" Abuja Wuse 400000; then
-  echo "Moderation failed (should reject)"; exit 1
+  echo "Moderation failed"; exit 1
 else
-  echo "Moderation passed (rejected scam)"
+  echo "Moderation OK"
 fi
 
-echo "-- Matching:"
+# Match scored
 flatshareNaija match "TestUser" | grep -q "Score:" || { echo "No scored matches"; exit 1; }
 
-echo "-- NLP search:"
+# NLP search
 flatshareNaija search "flat in Wuse under 600k with generator" >/dev/null || { echo "NLP search failed"; exit 1; }
+
+# Export CSV
+flatshareNaija export csv >/dev/null || { echo "Export failed"; exit 1; }
+
+# Backup
+flatshareNaija backup
 
 echo "✅ Smoke tests passed"

@@ -6,33 +6,31 @@ source "$APP_ROOT/lib/common.zsh"
 cmd="${1:-help}"; shift || true
 
 case "$cmd" in
-  init)
-    require_sqlite
-    mkdir -p "$APP_ROOT/db"
-    sqlite3 "$APP_ROOT/db/flatshare.db" < "$APP_ROOT/db/migrations/001_init.sql"
-    log_ok "Database initialized"
-    ;;
+  init)    exec "$APP_ROOT/bin/fsn-init" "$@" ;;
   user)    exec "$APP_ROOT/bin/fsn-user" "$@" ;;
   pref)    exec "$APP_ROOT/bin/fsn-pref" "$@" ;;
   listing) exec "$APP_ROOT/bin/fsn-listing" "$@" ;;
   match)   exec "$APP_ROOT/bin/fsn-match" "$@" ;;
   search)  exec "$APP_ROOT/bin/fsn-search" "$@" ;;
+  import)  exec "$APP_ROOT/bin/fsn-import" "$@" ;;
   export)  exec "$APP_ROOT/bin/fsn-export" "$@" ;;
-  seed)    exec "$APP_ROOT/bin/fsn-seed" "$@" ;;
+  backup)  exec "$APP_ROOT/bin/fsn-backup" "$@" ;;
+  tui)     exec "$APP_ROOT/bin/fsn-tui" "$@" ;;
   help|*)
     cat <<'USAGE'
 FlatshareNaija CLI
 
-Usage:
-  flatshareNaija init
-  flatshareNaija user add <name> <email> <phone> <city>
-  flatshareNaija pref set <user> <budget> <city> <area> <lifestyle>
-  flatshareNaija listing add <title> <desc> <city> <area> <rent>
-  flatshareNaija listing search <city> <area> <max>
-  flatshareNaija match <user>
-  flatshareNaija search "<natural language query>"
-  flatshareNaija export [csv|json]
-  flatshareNaija seed
+Commands:
+  init                      Initialize database
+  user add/list             Manage users
+  pref set/list             Manage preferences
+  listing add/search        Manage and search listings
+  match <user>              Match listings for user
+  search "<query>"          Natural-language search
+  import csv <file>         Import listings from CSV
+  export [csv|json]         Export listings
+  backup                    Backup database
+  tui                       Interactive text UI
 USAGE
     ;;
 esac

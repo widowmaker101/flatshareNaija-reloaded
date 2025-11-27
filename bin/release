@@ -4,13 +4,11 @@ version="${1:-}"
 [[ -z "$version" ]] && { echo "Usage: release <version>"; exit 1; }
 
 echo "🚀 Preparing release $version..."
-# Stage only existing files to avoid pathspec errors
-to_stage=()
-for p in bin lib db README.md LICENSE .gitignore .github/workflows/ci.yml; do
-  [[ -e "$p" ]] && to_stage+=("$p")
-done
+to_stage=(bin lib db README.md LICENSE .gitignore .github/workflows/ci.yml)
+existing=()
+for p in "${to_stage[@]}"; do [[ -e "$p" ]] && existing+=("$p"); done
 
-git add "${to_stage[@]}"
+git add "${existing[@]}"
 git commit -m "Release $version" || echo "No changes to commit"
 git tag -f "$version"
 git push origin main

@@ -1,28 +1,15 @@
 name: FlatshareNaija CI
-
 on:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
-
 jobs:
   lint-and-test:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Install deps
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y sqlite3 shellcheck
-
-      - name: Make scripts executable
-        run: chmod +x bin/* lib/* || true
-
-      - name: Shellcheck
-        run: shellcheck -x bin/* lib/* || true
-
-      - name: Run smoke tests
-        run: bin/test
+      - uses: actions/checkout@v3
+      - run: sudo apt-get update && sudo apt-get install -y sqlite3 shellcheck jq python3
+      - run: chmod +x bin/* lib/* || true
+      - run: shellcheck -x bin/* lib/* || true
+      - run: bin/test

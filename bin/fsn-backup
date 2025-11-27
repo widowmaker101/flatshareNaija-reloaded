@@ -1,0 +1,10 @@
+#!/usr/bin/env zsh
+set -euo pipefail
+APP_ROOT="${0:a:h:h}"
+source "$APP_ROOT/lib/common.zsh"
+require_sqlite
+
+ts="$(date +%Y%m%d-%H%M%S)"
+dest="$FSN_BACKUP_DIR/flatshare-$ts.db"
+cp "$FSN_DB" "$dest"
+log_ok "Backup created: $dest"

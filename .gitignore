@@ -1,3 +1,5 @@
 db/flatshare.db
+backups/
 *.log
 *.swp
+.DS_Store

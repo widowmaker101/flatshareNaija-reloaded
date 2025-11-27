@@ -3,13 +3,13 @@ set -euo pipefail
 APP_ROOT="${0:a:h:h}"
 source "$APP_ROOT/lib/common.zsh"
 source "$APP_ROOT/lib/scoring.zsh"
-db="$APP_ROOT/db/flatshare.db"
+require_sqlite
 
 user="${1:-}"; require_arg "$user" user
-uid=$(sqlite3 "$db" "SELECT id FROM users WHERE name='$(sql_escape "$user")';")
+uid=$(sqlite3 "$FSN_DB" "SELECT id FROM users WHERE name='$(sql_escape "$user")';")
 [[ -n "$uid" ]] || { log_err "User not found: $user"; exit 1; }
 
-pref=$(sqlite3 "$db" "SELECT budget,city,area,lifestyle FROM preferences WHERE user_id=$uid LIMIT 1;")
+pref=$(sqlite3 "$FSN_DB" "SELECT budget,city,area,lifestyle FROM preferences WHERE user_id=$uid ORDER BY id DESC LIMIT 1;")
 [[ -n "$pref" ]] || { log_err "Preferences not set for $user"; exit 1; }
 
 budget="${pref%%|*}"
@@ -17,9 +17,9 @@ city="$(cut -d'|' -f2 <<<"$pref")"
 area="$(cut -d'|' -f3 <<<"$pref")"
 lifestyle="$(cut -d'|' -f4 <<<"$pref")"
 
-log_info "Matching listings for $user (budget ₦$budget, $city/$area, lifestyle: ${lifestyle:-n/a})"
-sqlite3 "$db" "SELECT id,title,city,area,rent FROM listings WHERE city='$(sql_escape "$city")' AND area='$(sql_escape "$area")' AND rent <= $budget;" \
-| while IFS='|' read -r id title lcity larea rent; do
-    score=$(score_listing "$rent" "$budget" "$lifestyle" 1 1)
-    printf "%s | %s | %s | %s | ₦%s | Score:%d\n" "$id" "$title" "$lcity" "$larea" "$rent" "$score"
-  done | sort -t'|' -k6 -nr
+log_info "Matching listings for $user (₦$budget, $city/$area, lifestyle: ${lifestyle:-n/a})"
+sqlite3 "$FSN_DB" "SELECT id,title,city,area,rent,has_generator,has_inverter FROM listings WHERE city='$(sql_escape "$city")' AND area='$(sql_escape "$area")' AND rent <= $budget;" \
+| while IFS='|' read -r id title lcity larea rent gen inv; do
+    score=$(score_listing "$rent" "$budget" "$lifestyle" "$gen" "$inv")
+    printf "%s | %s | %s/%s | ₦%s | gen:%s inv:%s | Score:%d\n" "$id" "$title" "$lcity" "$larea" "$rent" "$gen" "$inv" "$score"
+  done | sort -t'|' -k7 -nr

@@ -1,0 +1,30 @@
+#!/usr/bin/env zsh
+set -euo pipefail
+APP_ROOT="${0:a:h:h}"
+source "$APP_ROOT/lib/common.zsh"
+require_sqlite
+
+sub="${1:-}"
+case "$sub" in
+  csv)
+    file="${2:-}"
+    require_arg "$file" "csv file"
+    [[ -f "$file" ]] || { log_err "File not found: $file"; exit 1; }
+    log_info "Importing CSV: $file"
+    # Expected columns: title,description,city,area,rent,has_generator,has_inverter
+    tail -n +2 "$file" | while IFS=, read -r title desc city area rent gen inv; do
+      title="${title//\"/}"; desc="${desc//\"/}"; city="${city//\"/}"; area="${area//\"/}"
+      rent="${rent//\"/}"; gen="${gen//\"/}"; inv="${inv//\"/}"
+      # Escape strings
+      etitle=$(sql_escape "$title"); edesc=$(sql_escape "$desc"); ecity=$(sql_escape "$city"); earea=$(sql_escape "$area")
+      # Try insert; if duplicate, skip
+      sqlite3 "$FSN_DB" "INSERT OR IGNORE INTO listings (title,description,city,area,rent,has_generator,has_inverter)
+                         VALUES ('$etitle','$edesc','$ecity','$earea',$rent,$gen,$inv);"
+      # Audit
+      sqlite3 "$FSN_DB" "INSERT INTO audit_log (action,entity,detail) VALUES ('import','listings','CSV row for $etitle');"
+    done
+    log_ok "CSV import complete"
+    ;;
+  *)
+    log_err "Usage: flatshareNaija import csv <file>"; exit 1 ;;
+esac

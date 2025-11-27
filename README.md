@@ -1,16 +1,13 @@
 # FlatshareNaija-reloaded
 
-Find and match affordable flats in Nigeria with a secure, testable CLI.
-
-![CI](https://github.com/your-org/flatshareNaija-reloaded/actions/workflows/ci.yml/badge.svg)
+Smart CLI to find and match flats in Nigeria. Secure inputs, moderation, scoring, NLP search, imports/exports, backups, CI.
 
 ## Quick start
-- Dependencies: sqlite3, zsh, python3
-- Initialize: \`flatshareNaija init\`
-- Seed: \`flatshareNaija seed\`
-- Try matching: \`flatshareNaija match "TestUser"\`
-
-## Commands
-See \`flatshareNaija help\`.
+- Dependencies: zsh, sqlite3, python3, jq
+- Initialize: `flatshareNaija init`
+- Seed (optional): `flatshareNaija import csv data/listings.csv`
+- Add user/prefs/listing: see `flatshareNaija help`
+- Match: `flatshareNaija match "TestUser"`
+- Search: `flatshareNaija search "flat in Wuse under 600k with generator"`
 
 © RIVERSAND INVESTMENT COMPANY

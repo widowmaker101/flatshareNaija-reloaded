@@ -1,0 +1,31 @@
+#!/usr/bin/env zsh
+set -euo pipefail
+APP_ROOT="${0:a:h:h}"
+source "$APP_ROOT/lib/common.zsh"
+
+while true; do
+  echo ""
+  echo "FlatshareNaija TUI — choose an option:"
+  echo "1) Init DB"
+  echo "2) Add user"
+  echo "3) Set preferences"
+  echo "4) Add listing"
+  echo "5) Match user"
+  echo "6) Search (NLP)"
+  echo "7) Export CSV"
+  echo "8) Backup DB"
+  echo "9) Quit"
+  read -r "?Select: " choice
+  case "$choice" in
+    1) flatshareNaija init ;;
+    2) read -r "?Name: " n; read -r "?Email: " e; read -r "?Phone (+234...): " p; read -r "?City: " c; flatshareNaija user add "$n" "$e" "$p" "$c" ;;
+    3) read -r "?User: " u; read -r "?Budget: " b; read -r "?City: " c; read -r "?Area: " a; read -r "?Lifestyle: " l; flatshareNaija pref set "$u" "$b" "$c" "$a" "$l" ;;
+    4) read -r "?Title: " t; read -r "?Desc: " d; read -r "?City: " c; read -r "?Area: " a; read -r "?Rent: " r; read -r "?Gen(0/1): " g; read -r "?Inv(0/1): " i; flatshareNaija listing add "$t" "$d" "$c" "$a" "$r" "$g" "$i" ;;
+    5) read -r "?User: " u; flatshareNaija match "$u" ;;
+    6) read -r "?Query: " q; flatshareNaija search "$q" ;;
+    7) flatshareNaija export csv ;;
+    8) flatshareNaija backup ;;
+    9) echo "Bye!"; break ;;
+    *) echo "Invalid choice" ;;
+  esac
+done
