@@ -1,0 +1,20 @@
+#!/usr/bin/env zsh
+set -euo pipefail
+APP_ROOT="${0:a:h:h}"
+db="$APP_ROOT/db/flatshare.db"
+
+[[ $# -eq 0 ]] && { echo "Usage: flatshareNaija search \"<query>\""; exit 1; }
+query="$*"
+
+parsed=$(python3 "$APP_ROOT/lib/nlp_search.py" "$query")
+
+city=$(echo "$parsed" | sed -n "s/.*'city': '\([^']*\)'.*/\1/p")
+area=$(echo "$parsed" | sed -n "s/.*'area': '\([^']*\)'.*/\1/p")
+budget=$(echo "$parsed" | sed -n "s/.*'budget': \([0-9]*\).*/\1/p")
+
+[[ -z "$budget" ]] && budget=1000000000
+[[ -z "$city"   ]] && city="Abuja"
+[[ -z "$area"   ]] && area="Wuse"
+
+echo "🔎 Parsed -> city: $city, area: $area, budget: $budget"
+sqlite3 "$db" "SELECT id,title,city,area,rent FROM listings WHERE city='$city' AND area='$area' AND rent <= $budget;"

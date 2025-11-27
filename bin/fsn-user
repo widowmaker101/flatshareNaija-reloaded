@@ -2,7 +2,6 @@
 set -euo pipefail
 APP_ROOT="${0:a:h:h}"
 db="$APP_ROOT/db/flatshare.db"
-
 cmd="${1:-help}"; shift || true
 
 case "$cmd" in
